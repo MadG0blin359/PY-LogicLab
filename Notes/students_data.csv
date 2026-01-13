@@ -1,0 +1,32 @@
+student_id,name,age,gender,grade,math_score,english_score,science_score,enrolled_date,remarks
+100,Zunaira AHMED,16,female,11,75,,66,10/06/2022,excellent
+101,shams abid,16,Male,10th,74,95,94,10/06/2022,GOOD
+102,hamza SHAH,,MALE,10,,missing,69,06/12/2022,needs improvement
+103,Zunaira AHMED,16,FEMALE,10,,missing,62,10/06/2022,average
+104,SARA ALI,16,male,11,,96,64,10/06/2022,GOOD
+105,Maha khan,16,Female,10,,,83,06/12/2022,needs improvement
+106,aliza nasir,17,female,11,64,,75,06/12/2022,Good
+107,SARA ALI,17,female,12,,63,62,11/06/2022,excellent
+108,Maha khan,16,Female,12,80,missing,89,06/12/2022,poor
+109,nida Zubair,17,female,12,,missing,97,10/06/2022,needs improvement
+110,ahmed noor,17,male,11th,65,67,100,06/12/2022,excellent
+111,aliza nasir,16,FEMALE,11th,,missing,95,10/06/2022,average
+112,SAIRA nasir,17,female,11,,87,89,10/06/2022,poor
+113,SAIRA nasir,17,female,10,,,98,06/12/2022,Average
+114,aliza nasir,17,male,12,,91,67,11/06/2022,poor
+115,ahmed noor,16,Female,12,65,91,94,06/12/2022,Average
+116,hamza SHAH,,Female,11,,,72,11/06/2022,excellent
+117,aliza nasir,18,male,11th,67,74,81,10/06/2022,GOOD
+118,aliza nasir,17,Male,10,100,74,62,11/06/2022,average
+119,SAIRA nasir,17,MALE,11th,73,,90,06/12/2022,Good
+120,SARA ALI,17,Male,10,,missing,89,10/06/2022,average
+121,shams abid,18,female,11,66,72,94,10/06/2022,Average
+122,SARA ALI,17,MALE,11th,75,,66,10/06/2022,good student
+123,Zunaira AHMED,17,Female,11th,,missing,63,06/12/2022,excellent
+124,shams abid,18,MALE,11th,,,91,06/12/2022,GOOD
+125,Maha khan,17,Male,12,94,80,63,10/06/2022,Average
+126,shams abid,,Male,10th,64,missing,67,06/12/2022,good student
+127,aliza nasir,16,FEMALE,12,,76,80,06/12/2022,poor
+128,SARA ALI,17,female,11,,64,89,10/06/2022,average
+129,SAIRA nasir,17,FEMALE,11,,64,83,11/06/2022,Average
+129,SAIRA nasir,17,FEMALE,11,,64,83,11/06/2022,Average
