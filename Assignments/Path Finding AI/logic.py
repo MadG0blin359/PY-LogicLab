@@ -3,8 +3,6 @@ import time
 
 def get_neighbors(node, rows, cols, grid):
     r, c = node
-    # Strict Clockwise Order: Up, Right, Bottom, Bottom-Right, Left, Top-Left
-    # Note: Top-Right and Bottom-Left are explicitly excluded.
     directions = [
         (-1, 0),  # 1. Up
         (0, 1),   # 2. Right
@@ -49,3 +47,27 @@ def reconstruct_path(visited, target):
         path.append(current)
         current = visited[current]
     return path[::-1]
+
+def dfs(start, target, rows, cols, grid, update_gui):
+    stack = [start]
+    visited = {start: None}
+    
+    while stack:
+        current = stack.pop()
+        
+        if current == target:
+            return reconstruct_path(visited, target)
+
+        neighbors = get_neighbors(current, rows, cols, grid)
+        for neighbor in reversed(neighbors):
+            if neighbor not in visited:
+                visited[neighbor] = current
+                stack.append(neighbor)
+                # Visual Distinction: Frontier (Queue/Stack) nodes
+                update_gui(neighbor, "frontier")
+
+        if current != start:
+            # Visual Distinction: Explored nodes
+            update_gui(current, "explored")
+            
+    return None

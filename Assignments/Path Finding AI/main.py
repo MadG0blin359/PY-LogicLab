@@ -8,7 +8,7 @@ ROWS, COLS = 20, 20
 CELL = WIDTH // COLS
 DELAY = 15  # Animation delay in ms
 
-# Colors [cite: 41, 42, 43]
+# Colors 
 WHITE = (240, 240, 240)
 BLACK = (30, 30, 30)     # Walls
 GREEN = (46, 204, 113)   # Start
