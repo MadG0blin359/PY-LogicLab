@@ -1,6 +1,6 @@
 import pygame
 import sys
-from logic import bfs, dfs, ucs
+from logic import bfs, dfs, ucs, iddfs
 
 # --- High-Contrast Cyber Theme ---
 CLR_BG      = (15, 15, 20)     # Darkest Navy
@@ -101,6 +101,7 @@ class PathfinderPro:
                     if event.key == pygame.K_1: self.start_search("BFS", bfs)
                     if event.key == pygame.K_2: self.start_search("DFS", dfs)
                     if event.key == pygame.K_3: self.start_search("UCS", ucs)
+                    if event.key == pygame.K_4: self.start_search("IDDFS", iddfs) # New Trigger
                     if event.key == pygame.K_r: self.render_ui()
 
 if __name__ == "__main__":
