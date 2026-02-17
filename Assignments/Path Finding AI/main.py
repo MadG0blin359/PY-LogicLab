@@ -29,7 +29,6 @@ class PathfinderPro:
         self._init_walls()
 
     def _init_walls(self):
-        """Initializes the static walls in the center for testing."""
         for i in range(4, 16): self.grid[i][10] = -1
 
     def draw_cell(self, r, c, color, number=None, border=False):
@@ -45,7 +44,6 @@ class PathfinderPro:
             pygame.draw.rect(self.screen, CLR_TEXT, rect, 1, border_radius=4)
 
     def gui_callback(self, pos, node_type):
-        """Mandatory visualization of frontier and explored nodes."""
         if pos == self.start or pos == self.target: return
         
         num = None
@@ -54,7 +52,7 @@ class PathfinderPro:
             num = self.exploration_count
             color = CLR_VISITED
         else:
-            color = CLR_FRONT # FIXED: Changed from CL_FRONT to CLR_FRONT
+            color = CLR_FRONT
             
         self.draw_cell(pos[0], pos[1], color, number=num)
         pygame.display.update()
