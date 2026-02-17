@@ -1,88 +1,107 @@
 import pygame
 import sys
-from logic import bfs, dfs
+from logic import bfs, dfs, ucs
 
-# Constants
-WIDTH, HEIGHT = 600, 600
+# --- High-Contrast Cyber Theme ---
+CLR_BG      = (15, 15, 20)     # Darkest Navy
+CLR_SIDEBAR = (25, 25, 35)     # Deep Slate
+CLR_GRID    = (35, 35, 45)     # Base Cell
+CLR_WALL    = (70, 75, 90)     # Concrete Wall
+CLR_START   = (0, 255, 127)    # Neon Spring Green
+CLR_TARGET  = (255, 46, 99)    # Neon Crimson
+CLR_FRONT   = (0, 217, 255)    # Cyan (Frontier)
+CLR_VISITED = (60, 60, 80)     # Muted Purple-Gray (Explored)
+CLR_PATH    = (255, 211, 0)    # Cyber Yellow (Final Route)
+CLR_TEXT    = (230, 230, 240)  # Off-White
+
+WIDTH, HEIGHT = 900, 650
+GRID_SIZE = 550
 ROWS, COLS = 20, 20
-CELL = WIDTH // COLS
-DELAY = 10 
+CELL = GRID_SIZE // COLS
+OFF_X, OFF_Y = 280, 50
 
-# Colors
-WHITE  = (245, 245, 245)
-BLACK  = (40, 40, 40)      # Static Walls
-GREEN  = (39, 174, 96)     # Start (S)
-RED    = (192, 57, 43)     # Target (T)
-BLUE   = (41, 128, 185)    # Frontier Nodes
-GRAY   = (127, 140, 141)   # Explored Nodes
-YELLOW = (241, 196, 15)    # Final Path
-
-class PathfinderApp:
+class PathfinderPro:
     def __init__(self):
         pygame.init()
-        # Requirement: Mandatory Title
-        pygame.display.set_caption("GOOD PERFORMANCE TIME APP")
+        pygame.display.set_caption("AI Search Laboratory")
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
+        self.font_m = pygame.font.SysFont('Consolas', 24, bold=True)
+        self.font_s = pygame.font.SysFont('Consolas', 16)
         self.grid = [[0 for _ in range(COLS)] for _ in range(ROWS)]
-        self.start = (2, 2)
-        self.target = (ROWS - 5, COLS - 5)
-        self.setup_walls()
+        self.start, self.target = (2, 2), (ROWS-5, COLS-5)
+        self.is_running = False 
+        self._init_walls()
 
-    def setup_walls(self):
-        # Static walls to navigate around
-        for i in range(5, 15):
-            self.grid[i][10] = -1
+    def _init_walls(self):
+        for i in range(4, 16): self.grid[i][10] = -1
 
-    def draw_node(self, pos, color):
-        r, c = pos
-        pygame.draw.rect(self.screen, color, (c * CELL, r * CELL, CELL - 1, CELL - 1))
-        pygame.display.update()
-        pygame.time.delay(DELAY)
+    def draw_cell(self, r, c, color, border=False):
+        rect = (c * CELL + OFF_X, r * CELL + OFF_Y, CELL - 2, CELL - 2)
+        pygame.draw.rect(self.screen, color, rect, border_radius=4)
+        if border: pygame.draw.rect(self.screen, CLR_TEXT, rect, 1, border_radius=4)
 
     def gui_callback(self, pos, node_type):
-        """Mandatory GUI visualization update"""
-        if pos == self.start or pos == self.target:
-            return
-        # Visually distinguish frontier and explored
-        color = BLUE if node_type == "frontier" else GRAY
-        self.draw_node(pos, color)
+        if pos == self.start or pos == self.target: return
+        color = CLR_FRONT if node_type == "frontier" else CLR_VISITED
+        self.draw_cell(pos[0], pos[1], color)
+        pygame.display.update()
+        pygame.time.delay(10) # Step-by-step animation
 
-    def render_base(self):
-        self.screen.fill(WHITE)
+    def render_ui(self, status="READY"):
+        self.screen.fill(CLR_BG)
+        pygame.draw.rect(self.screen, CLR_SIDEBAR, (0, 0, OFF_X - 20, HEIGHT))
+        
+        # Labels
+        self.screen.blit(self.font_m.render("ENGINE CONTROL", True, CLR_TEXT), (30, 50))
+        controls = [
+            ("[1] BFS (Shortest)", CLR_FRONT),
+            ("[2] DFS (Deep)", CLR_TARGET),
+            ("[3] UCS (Cost-Based)", CLR_PATH),
+            ("[R] Reset Canvas", CLR_TEXT)
+        ]
+        for i, (t, c) in enumerate(controls):
+            self.screen.blit(self.font_s.render(t, True, c), (30, 120 + (i * 45)))
+        
+        st_text = self.font_s.render(f">> {status}", True, CL_PATH if "SUCCESS" in status else CLR_TEXT)
+        self.screen.blit(st_text, (30, HEIGHT - 60))
+
         for r in range(ROWS):
             for c in range(COLS):
-                color = WHITE
-                if (r, c) == self.start: color = GREEN
-                elif (r, c) == self.target: color = RED
-                elif self.grid[r][c] == -1: color = BLACK
-                pygame.draw.rect(self.screen, color, (c * CELL, r * CELL, CELL - 1, CELL - 1))
+                color = CLR_GRID
+                if (r, c) == self.start: color = CLR_START
+                elif (r, c) == self.target: color = CLR_TARGET
+                elif self.grid[r][c] == -1: color = CLR_WALL
+                self.draw_cell(r, c, color)
         pygame.display.update()
 
-    def run_algorithm(self, algo_func):
-        self.render_base() # Clear previous search visualization
-        path = algo_func(self.start, self.target, ROWS, COLS, self.grid, self.gui_callback)
+    def start_search(self, name, algo):
+        if self.is_running: return
+        self.is_running = True
+        self.render_ui(f"STATUS: {name}...")
+        path = algo(self.start, self.target, ROWS, COLS, self.grid, self.gui_callback)
+        
         if path:
-            # Highlight the final successful route
             for p in path:
                 if p != self.start and p != self.target:
-                    self.draw_node(p, YELLOW)
+                    self.draw_cell(p[0], p[1], CLR_PATH, border=True)
+                    pygame.display.update()
+                    pygame.time.delay(25)
+            # The path stays visible because we DON'T call render_ui() immediately here
+            self.is_running = False 
+        else:
+            self.render_ui("STATUS: NO PATH FOUND")
+            self.is_running = False
 
-    def main_loop(self):
-        self.render_base()
+    def loop(self):
+        self.render_ui()
         while True:
             for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
-                
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_1: # BFS
-                        self.run_algorithm(bfs)
-                    if event.key == pygame.K_2: # DFS
-                        self.run_algorithm(dfs)
-                    if event.key == pygame.K_r: # Reset
-                        self.render_base()
+                if event.type == pygame.QUIT: pygame.quit(); sys.exit()
+                if event.type == pygame.KEYDOWN and not self.is_running:
+                    if event.key == pygame.K_1: self.start_search("BFS", bfs)
+                    if event.key == pygame.K_2: self.start_search("DFS", dfs)
+                    if event.key == pygame.K_3: self.start_search("UCS", ucs)
+                    if event.key == pygame.K_r: self.render_ui()
 
 if __name__ == "__main__":
-    app = PathfinderApp()
-    app.main_loop()
+    PathfinderPro().loop()
