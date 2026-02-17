@@ -1,6 +1,6 @@
 import pygame
 import sys
-from logic import bfs, dfs, ucs, iddfs
+from logic import bfs, dfs, ucs, iddfs, bidirectional_search
 
 # --- High-Contrast Cyber Theme ---
 CLR_BG      = (15, 15, 20)     # Darkest Navy
@@ -14,18 +14,18 @@ CLR_VISITED = (60, 60, 80)     # Muted Purple-Gray (Explored)
 CLR_PATH    = (255, 211, 0)    # Cyber Yellow (Final Route)
 CLR_TEXT    = (230, 230, 240)  # Off-White
 
-WIDTH, HEIGHT = 900, 650
-GRID_SIZE = 550
+WIDTH, HEIGHT = 950, 700
+GRID_SIZE = 600
 ROWS, COLS = 20, 20
 CELL = GRID_SIZE // COLS
-OFF_X, OFF_Y = 280, 50
+OFF_X, OFF_Y = 320, 50
 
 class PathfinderPro:
     def __init__(self):
         pygame.init()
         pygame.display.set_caption("AI Search Laboratory")
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
-        self.font_m = pygame.font.SysFont('Consolas', 24, bold=True)
+        self.font_m = pygame.font.SysFont('Consolas', 26, bold=True)
         self.font_s = pygame.font.SysFont('Consolas', 16)
         self.grid = [[0 for _ in range(COLS)] for _ in range(ROWS)]
         self.start, self.target = (2, 2), (ROWS-5, COLS-5)
@@ -33,6 +33,7 @@ class PathfinderPro:
         self._init_walls()
 
     def _init_walls(self):
+        """Initializes static walls for scenario testing."""
         for i in range(4, 16): self.grid[i][10] = -1
 
     def draw_cell(self, r, c, color, border=False):
@@ -41,22 +42,25 @@ class PathfinderPro:
         if border: pygame.draw.rect(self.screen, CLR_TEXT, rect, 1, border_radius=4)
 
     def gui_callback(self, pos, node_type):
+        """Mandatory real-time GUI update."""
         if pos == self.start or pos == self.target: return
         color = CLR_FRONT if node_type == "frontier" else CLR_VISITED
         self.draw_cell(pos[0], pos[1], color)
         pygame.display.update()
-        pygame.time.delay(10) # Step-by-step animation
+        pygame.time.delay(10) # Animation flow
 
     def render_ui(self, status="READY"):
         self.screen.fill(CLR_BG)
-        pygame.draw.rect(self.screen, CLR_SIDEBAR, (0, 0, OFF_X - 20, HEIGHT))
+        pygame.draw.rect(self.screen, CLR_SIDEBAR, (0, 0, OFF_X - 30, HEIGHT))
         
-        # Labels
-        self.screen.blit(self.font_m.render("ENGINE CONTROL", True, CLR_TEXT), (30, 50))
+        # Displaying All Mandatory Algorithms
+        self.screen.blit(self.font_m.render("AI ENGINE", True, CLR_TEXT), (30, 50))
         controls = [
             ("[1] BFS (Shortest)", CLR_FRONT),
             ("[2] DFS (Deep)", CLR_TARGET),
             ("[3] UCS (Cost-Based)", CLR_PATH),
+            ("[4] IDDFS (Optimal DFS)", CLR_START),
+            ("[5] Bidirectional", CLR_FRONT),
             ("[R] Reset Canvas", CLR_TEXT)
         ]
         for i, (t, c) in enumerate(controls):
@@ -65,6 +69,7 @@ class PathfinderPro:
         st_text = self.font_s.render(f">> {status}", True, CLR_PATH if "SUCCESS" in status else CLR_TEXT)
         self.screen.blit(st_text, (30, HEIGHT - 60))
 
+        # Render Grid
         for r in range(ROWS):
             for c in range(COLS):
                 color = CLR_GRID
@@ -81,12 +86,12 @@ class PathfinderPro:
         path = algo(self.start, self.target, ROWS, COLS, self.grid, self.gui_callback)
         
         if path:
+            # Highlight final path
             for p in path:
                 if p != self.start and p != self.target:
                     self.draw_cell(p[0], p[1], CLR_PATH, border=True)
                     pygame.display.update()
-                    pygame.time.delay(25)
-            # The path stays visible because we DON'T call render_ui() immediately here
+                    pygame.time.delay(20)
             self.is_running = False 
         else:
             self.render_ui("STATUS: NO PATH FOUND")
@@ -101,7 +106,8 @@ class PathfinderPro:
                     if event.key == pygame.K_1: self.start_search("BFS", bfs)
                     if event.key == pygame.K_2: self.start_search("DFS", dfs)
                     if event.key == pygame.K_3: self.start_search("UCS", ucs)
-                    if event.key == pygame.K_4: self.start_search("IDDFS", iddfs) # New Trigger
+                    if event.key == pygame.K_4: self.start_search("IDDFS", iddfs)
+                    if event.key == pygame.K_5: self.start_search("BIDIRECTIONAL", bidirectional_search)
                     if event.key == pygame.K_r: self.render_ui()
 
 if __name__ == "__main__":

@@ -114,3 +114,57 @@ def iddfs(start, target, rows, cols, grid, update_gui):
             return result
             
     return None
+
+def bidirectional_search(start, target, rows, cols, grid, update_gui):
+    # Forward search structures
+    f_queue = collections.deque([start])
+    f_visited = {start: None}
+    
+    # Backward search structures
+    b_queue = collections.deque([target])
+    b_visited = {target: None}
+    
+    while f_queue and b_queue:
+        # Expand Forward Frontier
+        path = expand_frontier(f_queue, f_visited, b_visited, rows, cols, grid, update_gui, "frontier")
+        if path: return path
+        
+        # Expand Backward Frontier
+        path = expand_frontier(b_queue, b_visited, f_visited, rows, cols, grid, update_gui, "frontier")
+        if path: return path[::-1] # Reverse because we found it from the back
+
+    return None
+
+def expand_frontier(queue, visited, other_visited, rows, cols, grid, update_gui, node_type):
+    current = queue.popleft()
+    
+    for neighbor in get_neighbors(current, rows, cols, grid):
+        if neighbor not in visited:
+            visited[neighbor] = current
+            queue.append(neighbor)
+            update_gui(neighbor, node_type)
+            
+            # If the frontiers meet, reconstruct the full path
+            if neighbor in other_visited:
+                return join_paths(visited, other_visited, neighbor)
+    
+    update_gui(current, "explored")
+    return None
+
+def join_paths(f_visited, b_visited, meeting_node):
+    # Path from start to meeting node
+    path_start = []
+    curr = meeting_node
+    while curr is not None:
+        path_start.append(curr)
+        curr = f_visited[curr]
+    path_start.reverse()
+    
+    # Path from meeting node to target
+    path_end = []
+    curr = b_visited[meeting_node]
+    while curr is not None:
+        path_end.append(curr)
+        curr = b_visited[curr]
+        
+    return path_start + path_end
