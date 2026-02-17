@@ -79,7 +79,8 @@ def ucs(start, target, rows, cols, grid, update_gui):
 def dls(start, target, rows, cols, grid, update_gui, limit):
     # Stack stores: (current_node, current_depth)
     stack = [(start, 0)]
-    visited = {start: (0, None)} # {node: (depth, parent)}
+    # Format: {node: (depth, parent)}
+    visited = {start: (0, None)}
     
     while stack:
         current, depth = stack.pop()
@@ -88,9 +89,9 @@ def dls(start, target, rows, cols, grid, update_gui, limit):
             return reconstruct_path(visited, target)
             
         if depth < limit:
-            # Reversing neighbors to maintain strict clockwise priority in a stack
+            # Reverse neighbors for LIFO to maintain clockwise priority
             for neighbor in reversed(get_neighbors(current, rows, cols, grid)):
-                # If not visited OR we found a shorter path to this node at a shallower depth
+                # DLS needs to re-visit if it finds a node at a shallower depth
                 if neighbor not in visited or depth + 1 < visited[neighbor][0]:
                     visited[neighbor] = (depth + 1, current)
                     stack.append((neighbor, depth + 1))
@@ -102,12 +103,12 @@ def dls(start, target, rows, cols, grid, update_gui, limit):
     return None
 
 def iddfs(start, target, rows, cols, grid, update_gui):
+    # Incrementally increase depth until target is found or grid is exhausted
     for depth in range(rows * cols):
+        # Note: In IDDFS, numbers reset each iteration because it restarts the search
         result = dls(start, target, rows, cols, grid, update_gui, depth)
-        
         if result:
             return result
-            
     return None
 
 def bidirectional_search(start, target, rows, cols, grid, update_gui):
