@@ -62,7 +62,7 @@ class PathfinderPro:
         for i, (t, c) in enumerate(controls):
             self.screen.blit(self.font_s.render(t, True, c), (30, 120 + (i * 45)))
         
-        st_text = self.font_s.render(f">> {status}", True, CL_PATH if "SUCCESS" in status else CLR_TEXT)
+        st_text = self.font_s.render(f">> {status}", True, CLR_PATH if "SUCCESS" in status else CLR_TEXT)
         self.screen.blit(st_text, (30, HEIGHT - 60))
 
         for r in range(ROWS):

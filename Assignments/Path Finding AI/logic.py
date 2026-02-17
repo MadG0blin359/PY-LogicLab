@@ -3,7 +3,6 @@ import heapq
 
 def get_neighbors(node, rows, cols, grid):
     r, c = node
-    # Strict 6-direction clockwise order: Up, Right, Bottom, Bottom-Right, Left, Top-Left [cite: 29-37]
     directions = [(-1, 0), (0, 1), (1, 0), (1, 1), (0, -1), (-1, -1)]
     neighbors = []
     for dr, dc in directions:
@@ -13,7 +12,6 @@ def get_neighbors(node, rows, cols, grid):
     return neighbors
 
 def reconstruct_path(visited, target):
-    """Unified path reconstruction for all search strategies."""
     path = []
     current = target
     while current is not None:
@@ -24,7 +22,6 @@ def reconstruct_path(visited, target):
     return path[::-1]
 
 def ucs(start, target, rows, cols, grid, update_gui):
-    """Uniform-Cost Search: Expands lowest-cost node first using a Priority Queue."""
     pq = [(0, start)]
     visited = {start: (0, None)} # {node: (cost, parent)}
     
@@ -35,7 +32,7 @@ def ucs(start, target, rows, cols, grid, update_gui):
             return reconstruct_path(visited, target)
 
         for neighbor in get_neighbors(current, rows, cols, grid):
-            new_cost = cost + 1 # Assignment assumes uniform step cost
+            new_cost = cost + 1
             if neighbor not in visited or new_cost < visited[neighbor][0]:
                 visited[neighbor] = (new_cost, current)
                 heapq.heappush(pq, (new_cost, neighbor))
@@ -46,7 +43,6 @@ def ucs(start, target, rows, cols, grid, update_gui):
     return None
 
 def bfs(start, target, rows, cols, grid, update_gui):
-    """Breadth-First Search: Level-by-level exploration (FIFO)."""
     queue = collections.deque([start])
     visited = {start: None}
     
@@ -66,7 +62,6 @@ def bfs(start, target, rows, cols, grid, update_gui):
     return None
 
 def dfs(start, target, rows, cols, grid, update_gui):
-    """Depth-First Search: Branch-first exploration (LIFO)."""
     stack = [start]
     visited = {start: None}
     
@@ -84,4 +79,29 @@ def dfs(start, target, rows, cols, grid, update_gui):
 
         if current != start:
             update_gui(current, "explored")
+    return None
+
+def dls(start, target, rows, cols, grid, update_gui, limit):
+    # Stack stores: (current_node, current_depth)
+    stack = [(start, 0)]
+    visited = {start: (0, None)} # {node: (depth, parent)}
+    
+    while stack:
+        current, depth = stack.pop()
+        
+        if current == target:
+            return reconstruct_path(visited, target)
+            
+        if depth < limit:
+            # Reversing neighbors to maintain strict clockwise priority in a stack
+            for neighbor in reversed(get_neighbors(current, rows, cols, grid)):
+                # If not visited OR we found a shorter path to this node at a shallower depth
+                if neighbor not in visited or depth + 1 < visited[neighbor][0]:
+                    visited[neighbor] = (depth + 1, current)
+                    stack.append((neighbor, depth + 1))
+                    update_gui(neighbor, "frontier")
+
+        if current != start:
+            update_gui(current, "explored")
+            
     return None
