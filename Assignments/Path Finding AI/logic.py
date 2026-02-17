@@ -111,55 +111,46 @@ def iddfs(start, target, rows, cols, grid, update_gui):
     return None
 
 def bidirectional_search(start, target, rows, cols, grid, update_gui):
-    # Forward search structures
-    f_queue = collections.deque([start])
-    f_visited = {start: None}
+    f_q, b_q = collections.deque([start]), collections.deque([target])
+    # Format: {node: (metadata, parent)}
+    f_vis, b_vis = {start: (0, None)}, {target: (0, None)}
     
-    # Backward search structures
-    b_queue = collections.deque([target])
-    b_visited = {target: None}
-    
-    while f_queue and b_queue:
-        # Expand Forward Frontier
-        path = expand_frontier(f_queue, f_visited, b_visited, rows, cols, grid, update_gui, "frontier")
-        if path: return path
-        
-        # Expand Backward Frontier
-        path = expand_frontier(b_queue, b_visited, f_visited, rows, cols, grid, update_gui, "frontier")
-        if path: return path[::-1] # Reverse because we found it from the back
+    while f_q and b_q:
+        # Step Forward
+        curr_f = f_q.popleft()
+        for n in get_neighbors(curr_f, rows, cols, grid):
+            if n not in f_vis:
+                f_vis[n] = (0, curr_f)
+                f_q.append(n)
+                update_gui(n, "frontier")
+                if n in b_vis: return _join_paths(f_vis, b_vis, n)
+        update_gui(curr_f, "explored")
 
+        # Step Backward
+        curr_b = b_q.popleft()
+        for n in get_neighbors(curr_b, rows, cols, grid):
+            if n not in b_vis:
+                b_vis[n] = (0, curr_b)
+                b_q.append(n)
+                update_gui(n, "frontier")
+                if n in f_vis: return _join_paths(f_vis, b_vis, n)
+        update_gui(curr_b, "explored")
     return None
 
-def expand_frontier(queue, visited, other_visited, rows, cols, grid, update_gui, node_type):
-    current = queue.popleft()
-    
-    for neighbor in get_neighbors(current, rows, cols, grid):
-        if neighbor not in visited:
-            visited[neighbor] = current
-            queue.append(neighbor)
-            update_gui(neighbor, node_type)
-            
-            # If the frontiers meet, reconstruct the full path
-            if neighbor in other_visited:
-                return join_paths(visited, other_visited, neighbor)
-    
-    update_gui(current, "explored")
-    return None
-
-def join_paths(f_visited, b_visited, meeting_node):
-    # Path from start to meeting node
+def _join_paths(f_vis, b_vis, meeting_node):
     path_start = []
     curr = meeting_node
+    # Traverse forward visited back to start
     while curr is not None:
         path_start.append(curr)
-        curr = f_visited[curr]
+        curr = f_vis[curr][1] # Extract parent from tuple
     path_start.reverse()
     
-    # Path from meeting node to target
     path_end = []
-    curr = b_visited[meeting_node]
+    # Traverse backward visited from meeting node back to target
+    curr = b_vis[meeting_node][1] # Start from parent of meeting node in backward search
     while curr is not None:
         path_end.append(curr)
-        curr = b_visited[curr]
+        curr = b_vis[curr][1]
         
     return path_start + path_end
