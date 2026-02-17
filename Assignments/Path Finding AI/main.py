@@ -93,15 +93,27 @@ class PathfinderPro:
     def start_search(self, name, algo):
         if self.is_running: return
         self.is_running = True
+        # Track exploration order locally to redraw numbers on path
+        order_map = {} 
+        
+        # Modified callback to store order
+        def tracked_callback(pos, node_type):
+            self.gui_callback(pos, node_type)
+            if node_type == "explored":
+                order_map[pos] = self.exploration_count
+
         self.render_ui(f"STATUS: {name}...")
-        path = algo(self.start, self.target, ROWS, COLS, self.grid, self.gui_callback)
+        path = algo(self.start, self.target, ROWS, COLS, self.grid, tracked_callback)
         
         if path:
             for p in path:
                 if p != self.start and p != self.target:
-                    self.draw_cell(p[0], p[1], CLR_PATH, border=True)
+                    # Get the original exploration number for this path node
+                    num = order_map.get(p) 
+                    # Redraw cell as Yellow but KEEP the number [cite: 19, 43]
+                    self.draw_cell(p[0], p[1], CLR_PATH, number=num, border=True)
                     pygame.display.update()
-                    pygame.time.delay(20)
+                    pygame.time.delay(30)
             self.is_running = False 
         else:
             self.render_ui("STATUS: NO PATH FOUND")
