@@ -3,6 +3,7 @@ import heapq
 
 def get_neighbors(node, rows, cols, grid):
     r, c = node
+    # Strict 6-direction clockwise: Up, Right, Bottom, Bottom-Right, Left, Top-Left
     directions = [(-1, 0), (0, 1), (1, 0), (1, 1), (0, -1), (-1, -1)]
     neighbors = []
     for dr, dc in directions:
@@ -12,73 +13,67 @@ def get_neighbors(node, rows, cols, grid):
     return neighbors
 
 def reconstruct_path(visited, target):
+    """Safe path reconstruction for all search strategies."""
     path = []
     current = target
+    if target not in visited: return None
+    
     while current is not None:
         path.append(current)
-        parent_info = visited[current]
-        # Handle UCS (tuple) vs BFS/DFS (direct node) storage
-        current = parent_info[1] if isinstance(parent_info, tuple) else parent_info
+        # Always extract the parent from the second index
+        current = visited[current][1] 
     return path[::-1]
-
-def ucs(start, target, rows, cols, grid, update_gui):
-    pq = [(0, start)]
-    visited = {start: (0, None)} # {node: (cost, parent)}
-    
-    while pq:
-        cost, current = heapq.heappop(pq)
-        
-        if current == target:
-            return reconstruct_path(visited, target)
-
-        for neighbor in get_neighbors(current, rows, cols, grid):
-            new_cost = cost + 1
-            if neighbor not in visited or new_cost < visited[neighbor][0]:
-                visited[neighbor] = (new_cost, current)
-                heapq.heappush(pq, (new_cost, neighbor))
-                update_gui(neighbor, "frontier")
-
-        if current != start:
-            update_gui(current, "explored")
-    return None
 
 def bfs(start, target, rows, cols, grid, update_gui):
     queue = collections.deque([start])
-    visited = {start: None}
+    visited = {start: (0, None)} # Format: (dist, parent)
     
     while queue:
         current = queue.popleft()
-        if current == target:
-            return reconstruct_path(visited, target)
+        if current == target: return reconstruct_path(visited, target)
 
         for n in get_neighbors(current, rows, cols, grid):
             if n not in visited:
-                visited[n] = current
+                visited[n] = (0, current)
                 queue.append(n)
                 update_gui(n, "frontier")
 
-        if current != start:
-            update_gui(current, "explored")
+        if current != start: update_gui(current, "explored")
     return None
 
 def dfs(start, target, rows, cols, grid, update_gui):
     stack = [start]
-    visited = {start: None}
+    visited = {start: (0, None)}
     
     while stack:
         current = stack.pop()
-        if current == target:
-            return reconstruct_path(visited, target)
+        if current == target: return reconstruct_path(visited, target)
 
-        # Reverse neighbors so the first clockwise direction is on top of stack
         for n in reversed(get_neighbors(current, rows, cols, grid)):
             if n not in visited:
-                visited[n] = current
+                visited[n] = (0, current)
                 stack.append(n)
                 update_gui(n, "frontier")
 
-        if current != start:
-            update_gui(current, "explored")
+        if current != start: update_gui(current, "explored")
+    return None
+
+def ucs(start, target, rows, cols, grid, update_gui):
+    pq = [(0, start)]
+    visited = {start: (0, None)}
+    
+    while pq:
+        cost, current = heapq.heappop(pq)
+        if current == target: return reconstruct_path(visited, target)
+
+        for n in get_neighbors(current, rows, cols, grid):
+            new_cost = cost + 1
+            if n not in visited or new_cost < visited[n][0]:
+                visited[n] = (new_cost, current)
+                heapq.heappush(pq, (new_cost, n))
+                update_gui(n, "frontier")
+
+        if current != start: update_gui(current, "explored")
     return None
 
 def dls(start, target, rows, cols, grid, update_gui, limit):
