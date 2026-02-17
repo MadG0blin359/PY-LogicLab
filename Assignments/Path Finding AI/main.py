@@ -70,7 +70,7 @@ class PathfinderPro:
             ("[1] BFS (Shortest)", CLR_FRONT),
             ("[2] DFS (Deep)", CLR_TARGET),
             ("[3] UCS (Cost-Based)", CLR_PATH),
-            ("[4] DLS (Limit=10)", CLR_TARGET),
+            ("[4] DLS (Limit=20)", CLR_TARGET),
             ("[5] IDDFS (Optimal DFS)", CLR_START),
             ("[6] Bidirectional", CLR_FRONT),
             ("[R] Reset Canvas", CLR_TEXT)
