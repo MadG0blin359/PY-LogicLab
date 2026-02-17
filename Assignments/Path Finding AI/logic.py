@@ -105,3 +105,12 @@ def dls(start, target, rows, cols, grid, update_gui, limit):
             update_gui(current, "explored")
             
     return None
+
+def iddfs(start, target, rows, cols, grid, update_gui):
+    for depth in range(rows * cols):
+        result = dls(start, target, rows, cols, grid, update_gui, depth)
+        
+        if result:
+            return result
+            
+    return None
